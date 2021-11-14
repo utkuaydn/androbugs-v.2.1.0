@@ -28,7 +28,7 @@ def get_elements_by_tagname(xml, tagname):
 
 def get_elements_by_tagname_sub(xml, tagname, results):
 
-    children = xml.getchildren()
+    children = list(xml)
 
     for child in children:
         get_elements_by_tagname_sub(child, tagname, results)

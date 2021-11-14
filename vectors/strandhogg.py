@@ -23,7 +23,7 @@ class Vector(VectorBase):
         if found or not activities_launch_mode:
             self.writer.startWriter("STRANDHOGG_2",
                                     LEVEL_CRITICAL,
-                                    "Standhogg 2.0",
+                                    "Strandhogg 2.0",
                                     "This application is vulnerable to the Standhogg 2.0 vulnerability. "
                                     "Please set activity launchModes to 'singleTask' or 'singleInstance'. "
                                     "Please see https://promon.co/strandhogg-2-0/ for more details",
@@ -31,7 +31,7 @@ class Vector(VectorBase):
         else:
             self.writer.startWriter("STRANDHOGG_2",
                                     LEVEL_INFO,
-                                    "Standhogg 2.0",
+                                    "Strandhogg 2.0",
                                     "This application does not seem to be vulnerable to the Standhogg 2.0 vulnerability",
                                     ["Strandhogg"])
 
