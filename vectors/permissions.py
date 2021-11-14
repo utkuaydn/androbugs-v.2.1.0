@@ -240,10 +240,7 @@ class Vector(VectorBase):
             num_checks = len(checked_permissions)
 
             all_method_objects = self.analysis.get_methods()
-            all_methods = []
-            for method in all_method_objects:
-                all_methods.append(method.name)
-
+            all_methods = [object.name for object in all_method_objects]
 
             if self.int_min_sdk >= 21: map_xml = ET.parse("API21_permission_mappings.xml").getroot()
             else:                      map_xml = ET.parse("API18_permission_mappings.xml").getroot()
@@ -283,7 +280,7 @@ class Vector(VectorBase):
             elif num_checks < num_perms:
                 self.writer.startWriter("PERMISSION_CHECKING", LEVEL_WARNING, 
                                     "Permission(s) Not Being Checked",
-                                    "This app does not check for the permissions below before making the relevant priviliged API calls. This app might not behave correctly.")
+                                    "This app does not check for the permissions below before making the respective priviliged API calls. This app might not behave correctly.")
                 for permission in dangerous_permissions:
                     if permission not in checked_permissions:
                         try:
@@ -296,7 +293,7 @@ class Vector(VectorBase):
             elif num_checks > num_perms:
                 self.writer.startWriter("PERMISSION_MISSING", LEVEL_WARNING, 
                                         "Permission(s) Missing",
-                                        "This app needs the permissions below for making the relevant priviliged API calls but they are missing from it's AndroidManifest. This app might not behave correctly.")
+                                        "This app needs the permissions below for making the respective priviliged API calls but they are missing from it's AndroidManifest. This app might not behave correctly.")
                 for permission in checked_permissions:
                     if permission not in dangerous_permissions:
                         try:
