@@ -311,6 +311,7 @@ class Writer:
                         if key2 == 'vector_details':
                             formatted[key][key2] = content.split('\n')
                 analyze_packed_result["details"] = formatted
+            analyze_packed_result.pop("_id", None)
             return analyze_packed_result
         return "{}"
 

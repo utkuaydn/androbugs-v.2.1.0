@@ -9,7 +9,7 @@ from datetime import datetime
 from typing import List
 from zipfile import BadZipfile
 import argparse
-from androguard import misc
+from androguard.misc import AnalyzeAPK
 import persist
 import vector_base
 import vectors
@@ -245,7 +245,7 @@ def __analyze(writer, args):
 
     writer.writeInf_ForceNoPrint("time_starting_analyze", datetime.utcnow().isoformat())
 
-    a, d, dx = misc.AnalyzeAPK(apk_Path)
+    a, d, dx = AnalyzeAPK(apk_Path)
 
     writer.update_analyze_status("starting_apk")
 
@@ -291,7 +291,7 @@ def __analyze(writer, args):
         int_min_sdk = 1
 
     try:
-        str_target_sdk_version = a.get_target_sdk_version()
+        str_target_sdk_version = a.get_effective_target_sdk_version()
         if (str_target_sdk_version is None) or (str_target_sdk_version == ""):
             raise ValueError
         else:

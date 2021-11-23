@@ -127,31 +127,31 @@ class Analysis():
 
         if self._args.store_analysis_result_in_db:
             if self._args.json and self._args.print and self._args.text:
-                cmd = main_cmd + " -v -e -s " + str(self._args.extra) + " -f \"" + (os.path.join(self._input_dir,
+                cmd = main_cmd + " -v -s -e " + str(self._args.extra) + " -f \"" + (os.path.join(self._input_dir,
                                                                                         filename)) + "\" -o \"" + (self._output_dir) + \
                 "\" -m massive -b " + str(self._args.analyze_engine_build) + " -tag " + str(self._args.analyze_tag) + " -j -p -t"
             elif self._args.json and self._args.print:
-                cmd = main_cmd + " -v -e -s " + str(self._args.extra) + " -f \"" + (os.path.join(self._input_dir,
+                cmd = main_cmd + " -v -s -e " + str(self._args.extra) + " -f \"" + (os.path.join(self._input_dir,
                                                                                         filename)) + "\" -o \"" + (self._output_dir) + \
                 "\" -m massive -b " + str(self._args.analyze_engine_build) + " -tag " + str(self._args.analyze_tag) + " -j -p"
             elif self._args.json and self._args.text:
-                cmd = main_cmd + " -v -e -s " + str(self._args.extra) + " -f \"" + (os.path.join(self._input_dir,
+                cmd = main_cmd + " -v -s -e " + str(self._args.extra) + " -f \"" + (os.path.join(self._input_dir,
                                                                                         filename)) + "\" -o \"" + (self._output_dir) + \
                 "\" -m massive -b " + str(self._args.analyze_engine_build) + " -tag " + str(self._args.analyze_tag) + " -j -t"
             elif self._args.print and self._args.text:
-                cmd = main_cmd + " -v -e -s " + str(self._args.extra) + " -f \"" + (os.path.join(self._input_dir,
+                cmd = main_cmd + " -v -s -e " + str(self._args.extra) + " -f \"" + (os.path.join(self._input_dir,
                                                                                         filename)) + "\" -o \"" + (self._output_dir) + \
                 "\" -m massive -b " + str(self._args.analyze_engine_build) + " -tag " + str(self._args.analyze_tag) + " -p -t"
             elif self._args.json:
-                cmd = main_cmd + " -v -e -s " + str(self._args.extra) + " -f \"" + (os.path.join(self._input_dir,
+                cmd = main_cmd + " -v -s -e " + str(self._args.extra) + " -f \"" + (os.path.join(self._input_dir,
                                                                                         filename)) + "\" -o \"" + (self._output_dir) + \
                 "\" -m massive -b " + str(self._args.analyze_engine_build) + " -tag " + str(self._args.analyze_tag) + " -j"
             elif self._args.print:
-                cmd = main_cmd + " -v -e -s " + str(self._args.extra) + " -f \"" + (os.path.join(self._input_dir,
+                cmd = main_cmd + " -v -s -e " + str(self._args.extra) + " -f \"" + (os.path.join(self._input_dir,
                                                                                         filename)) + "\" -o \"" + (self._output_dir) + \
                 "\" -m massive -b " + str(self._args.analyze_engine_build) + " -tag " + str(self._args.analyze_tag) + " -p"
             elif self._args.text:
-                cmd = main_cmd + " -v -e -s " + str(self._args.extra) + " -f \"" + (os.path.join(self._input_dir,
+                cmd = main_cmd + " -v -s -e " + str(self._args.extra) + " -f \"" + (os.path.join(self._input_dir,
                                                                                         filename)) + "\" -o \"" + (self._output_dir) + \
                 "\" -m massive -b " + str(self._args.analyze_engine_build) + " -tag " + str(self._args.analyze_tag) + " -t"
         

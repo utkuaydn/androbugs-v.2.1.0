@@ -22,7 +22,8 @@ class Vector(VectorBase):
             "USE_PERMISSION_SYSTEM_APP", "PERMISSION_NORMAL", "PERMISSION_DANGEROUS",
             "PERMISSION_NO_PREFIX_EXPORTED", "PERMISSION_EXPORTED",
             "PERMISSION_PROVIDER_IMPLICIT_EXPORTED", "PERMISSION_INTENT_FILTER_MISCONFIG",
-            "PERMISSION_IMPLICIT_SERVICE", "PERMISSION_CHECKING", "PERMISSION_HANDLING", "UNUSED_DANGEROUS_PERMISSIONS"]
+            "PERMISSION_IMPLICIT_SERVICE", "UNUSED_DANGEROUS_PERMISSION", "PERMISSION_HANDLING", "PERMISSION_CHECKING", "PERMISSION_MISSING"]
+
     def _get_all_components_by_permission(self, xml, permission):
         """
             Return:
@@ -59,6 +60,7 @@ class Vector(VectorBase):
 
     def analyze(self) -> None:
         all_permissions = self.apk.get_permissions()
+        all_permissions = list(set(all_permissions)) # get rid of duplicates
 
         # Empty permissionGroup check
         # TODO test dit
@@ -228,7 +230,7 @@ class Vector(VectorBase):
             checked_permissions = []
             all_strings = self.analysis.get_strings()
             for string in all_strings:
-                for permission in all_permissions:
+                for permission in dangerous_permissions:
                     if permission in string.get_value():
                         calls = list(string.get_xref_from())
                         for i in range(len(calls)):
@@ -262,11 +264,14 @@ class Vector(VectorBase):
             unused_dangerous_permissions = [p for p in dangerous_permissions if p not in used_dangerous_permissions]
 
             if unused_dangerous_permissions:
-                self.writer.startWriter("UNUSED_DANGEROUS_PERMISSIONS", LEVEL_CRITICAL, 
+                self.writer.startWriter("UNUSED_DANGEROUS_PERMISSION", LEVEL_CRITICAL, 
                                     "Permission(s) Not Being Used",
-                                    "This app is vulnerable to attacks due to the unused dangerous permissions listed below. Caution is advised.")
+                                    "This app might be vulnerable to attacks due to the unused dangerous permissions listed below. Caution is advised.")
                 for permission in unused_dangerous_permissions:
-                    self.writer.write(permission)
+                    if permission in mapped_methods: 
+                        self.writer.write(permission)
+                    else:
+                        self.writer.write(permission + " (this permission is not listed in permission to API method mappings, it might be being used)")
                     self._print_permission_usage(xml, permission)
 
             if num_checks == 0 and used_dangerous_permissions:
@@ -287,7 +292,7 @@ class Vector(VectorBase):
                             for (method, method_class) in mapped_methods[permission]:
                                 self.writer.write("Uses " + method + " from class " + method_class + " without checking for " + permission)
                         except KeyError:
-                            self.writer.write(permission)
+                            self.writer.write(permission + " (could not find which API call is mapped to the permission)")
                         self._print_permission_usage(xml, permission)
                 
             elif num_checks > num_perms:
@@ -300,7 +305,7 @@ class Vector(VectorBase):
                             for (method, method_class) in mapped_methods[permission]:
                                 self.writer.write("Uses " + method + " from class " + method_class + " without having " + permission)
                         except KeyError:
-                            self.writer.write(permission)
+                            self.writer.write(permission + " (could not find which API call is mapped to the permission)")
                         self._print_permission_usage(xml, permission)
 
 
