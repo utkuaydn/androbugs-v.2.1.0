@@ -77,7 +77,7 @@ class Vector(VectorBase):
         if permissions_with_empty_permission_group:  # If the list is not empty
             self.writer.startWriter("PERMISSION_GROUP_EMPTY_VALUE", LEVEL_CRITICAL,
                                     "AndroidManifest PermissionGroup Checking",
-                                    "Setting the 'permissionGroup' attribute an empty value will make the permission definition become invalid and no other apps will be able to use the permission.", cve_number="CVE-2013-6272")
+                                    "Setting the 'permissionGroup' attribute an empty value will make the permission definition become invalid and no other apps will be able to use the permission.")
 
             for permission_name in permissions_with_empty_permission_group:
                 self.writer.write(
@@ -107,7 +107,7 @@ class Vector(VectorBase):
             if list_user_permission_critical_manufacturer:
                 self.writer.startWriter("USE_PERMISSION_SYSTEM_APP", LEVEL_CRITICAL,
                                         "AndroidManifest System Use Permission Checking",
-                                        "This app should only be released and signed by device manufacturer or Google and put under '/system/app'. If not, it may be a malicious app.", cve_number="CVE-2013-6272")
+                                        "This app should only be released and signed by device manufacturer or Google and put under '/system/app'. If not, it may be a malicious app.")
 
                 for permission in list_user_permission_critical_manufacturer:
                     self.writer.write("System use-permission found: \"" + permission + "\"")
@@ -115,7 +115,7 @@ class Vector(VectorBase):
             if list_user_permission_critical:
                 self.writer.startWriter("USE_PERMISSION_CRITICAL", LEVEL_CRITICAL,
                                         "AndroidManifest Critical Use Permission Checking",
-                                        "This app has very high privileges. Use it carefully.", cve_number="CVE-2013-6272")
+                                        "This app has very high privileges. Use it carefully.")
 
                 for permission in list_user_permission_critical:
                     self.writer.write("Critical use-permission found: \"" + permission + "\"")
@@ -138,7 +138,7 @@ class Vector(VectorBase):
                                         "This app is using the Internet via HTTP protocol.")
             else:
                 self.writer.startWriter("USE_PERMISSION_INTERNET", LEVEL_CRITICAL, "Accessing the Internet Checking",
-                                        "This app has some internet accessing codes but does not have 'android.permission.INTERNET' use-permission in AndroidManifest.", cve_number="CVE-2013-6272")
+                                        "This app has some internet accessing codes but does not have 'android.permission.INTERNET' use-permission in AndroidManifest.")
         else:
             self.writer.startWriter("USE_PERMISSION_INTERNET", LEVEL_INFO, "Accessing the Internet Checking",
                                     "No HTTP-related connection codes found.")
@@ -178,7 +178,7 @@ class Vector(VectorBase):
                                     "this app. android:protectionLevel=\"signature\" ensures that apps with request a "
                                     "permission must be signed with same certificate as the application that declared "
                                     "the permission. Please check some related cases: "
-                                    "http://www.wooyun.org/bugs/wooyun-2010-039697 Please change these permissions:", cve_number="CVE-2013-6272")
+                                    "http://www.wooyun.org/bugs/wooyun-2010-039697 Please change these permissions:")
 
             for class_name in dangerous_custom_permissions:
                 self.writer.write(class_name)
@@ -199,7 +199,7 @@ class Vector(VectorBase):
                                     "android:protectionLevel=\"signature\" ensures that apps with request a permission "
                                     "must be signed with same certificate as the application that declared the "
                                     "permission. Please make sure these permission are all really need to be exported "
-                                    "or otherwise change to \"signature\" or \"signatureOrSystem\" protection level.", cve_number="CVE-2013-6272")
+                                    "or otherwise change to \"signature\" or \"signatureOrSystem\" protection level.")
             for class_name in normal_or_default_custom_permissions:
                 self.writer.write(class_name)
                 self._print_permission_usage(xml, class_name)
@@ -524,7 +524,7 @@ class Vector(VectorBase):
             if list_alerting_exposing_components_Google:
                 self.writer.startWriter("PERMISSION_EXPORTED_GOOGLE", LEVEL_NOTICE,
                                         "AndroidManifest Exported Components Checking 2",
-                                        "Found \"exported\" components(except for Launcher) for receiving Google's \"Android\" actions (AndroidManifest.xml):", cve_number="CVE-2013-6272")
+                                        "Found \"exported\" components(except for Launcher) for receiving Google's \"Android\" actions (AndroidManifest.xml):")
 
                 for i in list_alerting_exposing_components_Google:
                     self.writer.write("%10s => %s" % (i[0], i[1]))
@@ -609,7 +609,7 @@ class Vector(VectorBase):
       (1)https://www.nowsecure.com/mobile-security/ebay-android-content-provider-injection-vulnerability.html
       (2)http://blog.trustlook.com/2013/10/23/ebay-android-content-provider-information-disclosure-vulnerability/
       (3)http://www.wooyun.org/bugs/wooyun-2010-039169
-    """, cve_number="CVE-2013-6272")
+    """)
 
                 for i in list_alerting_exposing_providers_no_exported_setting:
                     self.writer.write("%10s => %s" % ("provider", i[0]))
@@ -622,7 +622,7 @@ class Vector(VectorBase):
     Vulnerable ContentProvider Case Example: 
       (1)https://www.nowsecure.com/mobile-security/ebay-android-content-provider-injection-vulnerability.html
       (2)http://blog.trustlook.com/2013/10/23/ebay-android-content-provider-information-disclosure-vulnerability/
-      (3)http://www.wooyun.org/bugs/wooyun-2010-039169""", cve_number="CVE-2013-6272")
+      (3)http://www.wooyun.org/bugs/wooyun-2010-039169""")
                 for i in list_alerting_exposing_providers:
                     self.writer.write("%10s => %s" % ("provider", i[0]))
 
@@ -676,7 +676,7 @@ class Vector(VectorBase):
                                         """Misconfiguration in "intent-filter" of these components (AndroidManifest.xml). 
     Config "intent-filter" should not have "android:exported" or "android:enabled" attribute. 
     Reference: http://developer.android.com/guide/topics/manifest/intent-filter-element.html
-    """, cve_number="CVE-2013-6272")
+    """)
                 for tag, name in list_wrong_intent_filter_settings:
                     self.writer.write("%10s => %s" % (tag, name))
 
@@ -686,7 +686,7 @@ class Vector(VectorBase):
                                         """Misconfiguration in "intent-filter" of these components (AndroidManifest.xml).
     Config "intent-filter" should have at least one "action".
     Reference: http://developer.android.com/guide/topics/manifest/intent-filter-element.html
-    """, cve_number="CVE-2013-6272")
+    """)
                 for tag, name in list_no_actions_in_intent_filter:
                     self.writer.write("%10s => %s" % (tag, name))
         else:
@@ -700,7 +700,7 @@ class Vector(VectorBase):
         if list_implicit_service_components:
             self.writer.startWriter("PERMISSION_IMPLICIT_SERVICE", LEVEL_CRITICAL, "Implicit Service Checking",
                                     """To ensure your app is secure, always use an explicit intent when starting a Service and DO NOT declare intent filters for your services. Using an implicit intent to start a service is a security hazard because you cannot be certain what service will respond to the intent, and the user cannot see which service starts. 
-    Reference: http://developer.android.com/guide/components/intents-filters.html#Types""", ["Implicit_Intent"], cve_number="CVE-2013-6272")
+    Reference: http://developer.android.com/guide/components/intents-filters.html#Types""", ["Implicit_Intent"])
 
             for name in list_implicit_service_components:
                 self.writer.write("=> %s" % name)

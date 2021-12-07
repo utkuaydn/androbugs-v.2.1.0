@@ -111,4 +111,4 @@ class Vector(VectorBase):
         else:
             self.writer.startWriter("FRAGMENT_INJECTION", LEVEL_INFO, "Fragment Vulnerability Checking",
                                "Did not detect the vulnerability of \"Fragment\" dynamically loading into \"PreferenceActivity\" or \"SherlockPreferenceActivity\"",
-                               None)
+                               None, "BID 64208, CVE-2013-6271")

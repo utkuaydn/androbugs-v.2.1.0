@@ -18,7 +18,7 @@ class Vector(VectorBase):
     2.http://blog.c22.cc/advisories/cve-2013-5112-evernote-android-insecure-storage-of-pin-data-bypass-of-pin-protection/
     3.http://nelenkov.blogspot.co.uk/2012/06/unpacking-android-backups.html
     Reference: http://developer.android.com/guide/topics/manifest/application-element.html#allowbackup
-    """)
+    """, cve_number="CVE-2013-5112")
         else:
             self.writer.startWriter("ALLOW_BACKUP", LEVEL_INFO, "AndroidManifest Adb Backup Checking",
                                "This app has disabled Adb Backup.")

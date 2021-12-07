@@ -31,7 +31,7 @@ class Vector(VectorBase):
         else:
             self.writer.startWriter("HACKER_DB_KEY", LEVEL_INFO, "Key for Android SQLite Databases Encryption",
                                     "Did not find using the symmetric key(PRAGMA key) to encrypt the SQLite databases (It's still possible that it might use but we did not find out).",
-                                    ["Database", "Hacker"], "CVE-2011-3901")
+                                    ["Database", "Hacker"])
         # SQLiteDatabase - beginTransactionNonExclusive() checking:
 
         if (self.int_min_sdk is not None) and (self.int_min_sdk < 11):
@@ -46,18 +46,18 @@ class Vector(VectorBase):
                     Reference: http://developer.android.com/reference/android/database/sqlite/SQLiteDatabase.html#beginTransactionNonExclusive()")""" % self.int_min_sdk
                 self.writer.startWriter("DB_DEPRECATED_USE1", LEVEL_CRITICAL,
                                         "SQLiteDatabase Transaction Deprecated Checking",
-                                        output_string, ["Database"], "CVE-2011-3901")
+                                        output_string, ["Database"])
 
                 self.writer.show_Paths(path_sq_lite_database_begin_transaction_non_exclusive)
             else:
                 self.writer.startWriter("DB_DEPRECATED_USE1", LEVEL_INFO,
                                         "SQLiteDatabase Transaction Deprecated Checking",
                                         "Ignore checking \"SQLiteDatabase:beginTransactionNonExclusive\" you're not using it.",
-                                        ["Database"], "CVE-2011-3901")
+                                        ["Database"])
         else:
             self.writer.startWriter("DB_DEPRECATED_USE1", LEVEL_INFO, "SQLiteDatabase Transaction Deprecated Checking",
                                     "Ignore checking \"SQLiteDatabase:beginTransactionNonExclusive\" because your set minSdk >= 11.",
-                                    ["Database"], "CVE-2011-3901")
+                                    ["Database"])
 
         # Find "SQLite Encryption Extension (SEE) on Android"
         has_SSE_databases = False
@@ -77,7 +77,7 @@ class Vector(VectorBase):
             self.writer.startWriter("DB_SEE", LEVEL_INFO,
                                     "Android SQLite Databases Encryption (SQLite Encryption Extension (SEE))",
                                     "This app is \"NOT\" using SQLite Encryption Extension (SEE) on Android (http://www.sqlite.org/android) to encrypt or decrpyt databases.",
-                                    ["Database"], "CVE-2011-3901")
+                                    ["Database"])
 
         # Checking whether the app is using SQLCipher:
         isUsingSQLCipher = False
@@ -128,7 +128,7 @@ class Vector(VectorBase):
         else:
             self.writer.startWriter("DB_SQLCIPHER", LEVEL_INFO, "Android SQLite Databases Encryption (SQLCipher)",
                                     "This app is \"NOT\" using SQLCipher(http://sqlcipher.net/) to encrypt or decrpyt databases.",
-                                    ["Database"], "CVE-2011-3901")
+                                    ["Database"])
 
         # SQLite databases
         is_using_android_dbs = self.analysis.find_methods(descriptor="\(\)Landroid/database/sqlite/SQLiteDatabase;")

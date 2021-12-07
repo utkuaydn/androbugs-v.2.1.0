@@ -90,7 +90,7 @@ class Vector(VectorBase):
             self.writer.startWriter("SSL_CN1", LEVEL_CRITICAL,
                                     "SSL Implementation Checking (Verifying Host Name in Custom Classes)",
                                     output_string,
-                                    ["SSL_Security"], "CVE-2013-4710")
+                                    ["SSL_Security"])
 
             for method in list_HOSTNAME_INNER_VERIFIER:
                 self.writer.write(method.get_class_name() + "->" + method.get_name() + method.get_descriptor())
@@ -103,7 +103,7 @@ class Vector(VectorBase):
         else:
             self.writer.startWriter("SSL_CN1", LEVEL_INFO,
                                     "SSL Implementation Checking (Verifying Host Name in Custom Classes)",
-                                    "Self-defined HOSTNAME VERIFIER checking OK.", ["SSL_Security"], "CVE-2013-4710")
+                                    "Self-defined HOSTNAME VERIFIER checking OK.", ["SSL_Security"])
 
         # (2)ALLOW_ALL_HOSTNAME_VERIFIER fields checking
 
@@ -145,7 +145,7 @@ class Vector(VectorBase):
 
             self.writer.startWriter("SSL_CN2", LEVEL_CRITICAL,
                                     "SSL Implementation Checking (Verifying Host Name in Fields)",
-                                    output_string, ["SSL_Security"], "CVE-2013-4710")
+                                    output_string, ["SSL_Security"])
 
             # if filtered_ALLOW_ALL_HOSTNAME_VERIFIER_paths:
             #     """
@@ -178,7 +178,7 @@ class Vector(VectorBase):
             self.writer.startWriter("SSL_CN2", LEVEL_INFO,
                                     "SSL Implementation Checking (Verifying Host Name in Fields)",
                                     "Critical vulnerability \"ALLOW_ALL_HOSTNAME_VERIFIER\" field setting or \"AllowAllHostnameVerifier\" class instance not found.",
-                                    ["SSL_Security"], "CVE-2013-4710")
+                                    ["SSL_Security"])
 
         # SSL getInsecure
 
@@ -196,12 +196,12 @@ class Vector(VectorBase):
 
             self.writer.startWriter("SSL_CN3", LEVEL_CRITICAL, "SSL Implementation Checking (Insecure component)",
                                     output_string,
-                                    ["SSL_Security"], "CVE-2013-4710")
+                                    ["SSL_Security"])
             self.writer.show_Paths(path_get_insecure)
         else:
             self.writer.startWriter("SSL_CN3", LEVEL_INFO, "SSL Implementation Checking (Insecure component)",
                                     "Did not detect SSLSocketFactory by insecure method \"getInsecure\".",
-                                    ["SSL_Security"], "CVE-2013-4710")
+                                    ["SSL_Security"])
 
         # HttpHost default scheme "http"
 
@@ -230,12 +230,12 @@ class Vector(VectorBase):
         if list_http_host_scheme_http:
             self.writer.startWriter("SSL_DEFAULT_SCHEME_NAME", LEVEL_CRITICAL, "SSL Implementation Checking (HttpHost)",
                                     "This app uses \"HttpHost\", but the default scheme is \"http\" or \"HttpHost.DEFAULT_SCHEME_NAME(http)\". Please change to \"https\":",
-                                    ["SSL_Security"], "CVE-2013-4710")
+                                    ["SSL_Security"])
 
             self.writer.show_Paths(list_http_host_scheme_http)
         else:
             self.writer.startWriter("SSL_DEFAULT_SCHEME_NAME", LEVEL_INFO, "SSL Implementation Checking (HttpHost)",
-                                    "DEFAULT_SCHEME_NAME for HttpHost check: OK", ["SSL_Security"], "CVE-2013-4710")
+                                    "DEFAULT_SCHEME_NAME for HttpHost check: OK", ["SSL_Security"])
 
         # SSL Verification Fail (To check whether the code verifies the certificate)
         methods_X509TrustManager_list = helper_functions. \
@@ -305,7 +305,7 @@ class Vector(VectorBase):
     Please do not try to create a "X509Certificate" and override "checkClientTrusted", "checkServerTrusted", and "getAcceptedIssuers" functions with blank implementation.
     We strongly suggest you use the existing API instead of creating your own X509Certificate class. 
     Please modify or remove these vulnerable code: 
-    """, ["SSL_Security"], "CVE-2013-4710")
+    """, ["SSL_Security"])
             if list_X509Certificate_Critical_class:
                 self.writer.write("[Confirm Vulnerable]")
                 for name in list_X509Certificate_Critical_class:
@@ -327,4 +327,4 @@ class Vector(VectorBase):
 
         else:
             self.writer.startWriter("SSL_X509", LEVEL_INFO, "SSL Certificate Verification Checking",
-                                    "Did not find vulnerable X509Certificate code.", ["SSL_Security"], "CVE-2013-4710")
+                                    "Did not find vulnerable X509Certificate code.", ["SSL_Security"])

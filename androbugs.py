@@ -324,7 +324,7 @@ def __analyze(writer, args):
             print(file_name.replace('.py', ''))
 
     writer.update_analyze_status("checking_vectors")
-    loaded_vector_classes: [vector_base.Vector]
+    loaded_vector_classes: List[vector_base.Vector]
     for vector_class in loaded_vector_classes:
         if args.debug_vector is None or args.debug_vector in vector_class.Vector.tags:
             print("Running " + vector_class.__name__ + " analysis.")
@@ -367,7 +367,7 @@ def main():
                 print (file_name)
                 loaded_vector_classes.append(importlib.import_module('vectors.' + file_name.replace('.py', '')))
 
-        loaded_vector_classes: [vector_base.Vector]
+        loaded_vector_classes: List[vector_base.Vector]
         for vector_class in loaded_vector_classes:
             print(vector_class.Vector.tags, vector_class.Vector.description)
         return
