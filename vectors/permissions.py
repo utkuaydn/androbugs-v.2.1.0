@@ -1,6 +1,7 @@
 import collections
 import xml.etree.ElementTree as ET
 import re
+import copy
 import utils
 from vector_base import VectorBase
 from constants import *
@@ -213,7 +214,6 @@ class Vector(VectorBase):
 
         # Permission checking
         if all_permissions:
-
             dangerous_permissions = []
             all_permissions_details = self.apk.get_details_permissions()
             
@@ -248,7 +248,7 @@ class Vector(VectorBase):
             else:                      map_xml = ET.parse("API18_permission_mappings.xml").getroot()
 
             mapped_methods = {}
-            used_dangerous_permissions = []
+            used_dangerous_permissions = copy.deepcopy(checked_permissions)
             for permission in dangerous_permissions:
                 permission_maps = utils.get_elements_by_tagname(map_xml, "permission")
                 for permission_map in permission_maps:  
@@ -261,6 +261,7 @@ class Vector(VectorBase):
                             if method in all_methods:
                                 if permission in mapped_methods: mapped_methods[permission].append((method, method_class))
                                 else:                            mapped_methods[permission] = [(method, method_class)]
+            used_dangerous_permissions = list(set(used_dangerous_permissions))
             unused_dangerous_permissions = [p for p in dangerous_permissions if p not in used_dangerous_permissions]
 
             if unused_dangerous_permissions:

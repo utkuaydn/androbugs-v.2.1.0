@@ -8,7 +8,7 @@ import base64
 class Vector(VectorBase):
     description = "Checks for package listeners and queries performed by the app."
     tags = ["LISTEN_PACKAGE_ADDED", "LISTEN_PACKAGE_CHANGED", "LISTEN_PACKAGE_REPLACED", "LISTEN_PACKAGE_REMOVED", 
-            "QUERY_INTENT", "QUERY_PACKAGE", "QUERY_PERMISSION", "QUERY_ALL_PACKAGES", "QUERY_UNKNOWN_PACKAGES"] # list of tags that are checked within this class
+            "QUERY_INTENT", "QUERY_PACKAGE", "NO_QUERY_PERMISSION", "QUERY_ALL_PACKAGES", "QUERY_UNKNOWN_PACKAGES"] # list of tags that are checked within this class
 
     def analyze(self) -> None:
 
@@ -85,7 +85,7 @@ class Vector(VectorBase):
                     for package in queried_packages:
                         self.writer.write(package)
                 else:
-                    self.writer.startWriter("QUERY_PERMISSION", LEVEL_WARNING, 
+                    self.writer.startWriter("NO_QUERY_PERMISSION", LEVEL_WARNING, 
                                                     "App Has No Permission to Query Installed Application(s)",
                                                     "This app tries to query the device for installed applications without having the permission. The app might not behave correctly.")
                 
