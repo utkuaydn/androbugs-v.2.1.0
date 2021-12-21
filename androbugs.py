@@ -205,8 +205,12 @@ def __analyze(writer, args):
         else:
             args.line_max_output_characters = LINE_MAX_OUTPUT_CHARACTERS_LINUX - LINE_MAX_OUTPUT_INDENT
 
-    if not os.path.isdir(args.report_output_dir):
-        os.mkdir(args.report_output_dir)
+    if args.json or args.text:
+        if not os.path.isdir(args.report_output_dir):
+            try:
+                os.mkdir(args.report_output_dir)
+            except FileExistsError:
+                pass
 
     writer.writeInf_ForceNoPrint("analyze_mode", args.analyze_mode)
     writer.writeInf_ForceNoPrint("analyze_engine_build", args.analyze_engine_build)
@@ -354,8 +358,8 @@ def main():
     parser = argparse.ArgumentParser(description='AndroBugs Framework - Android App Security Vulnerability Scanner')
     args = parseArgument(parser)
 
-    if args.json is False and args.text is False:
-        parser.error("please provide at least one output format (-j or -t)")
+    if args.json == False and args.text == False and args.print == False and args.store_analysis_result_in_db == False:
+        parser.error("Please provide at least one output format (--json, --text, --print, or --store_analysis_result_in_db)")
 
     # list vectors
     if args.list_vectors:

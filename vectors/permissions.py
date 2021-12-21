@@ -23,7 +23,7 @@ class Vector(VectorBase):
             "USE_PERMISSION_SYSTEM_APP", "PERMISSION_NORMAL", "PERMISSION_DANGEROUS",
             "PERMISSION_NO_PREFIX_EXPORTED", "PERMISSION_EXPORTED",
             "PERMISSION_PROVIDER_IMPLICIT_EXPORTED", "PERMISSION_INTENT_FILTER_MISCONFIG",
-            "PERMISSION_IMPLICIT_SERVICE", "UNUSED_DANGEROUS_PERMISSION", "PERMISSION_HANDLING", "PERMISSION_CHECKING", "PERMISSION_MISSING"]
+            "PERMISSION_IMPLICIT_SERVICE", "UNUSED_DANGEROUS_PERMISSION", "UNCHECKED_DANGEROUS_PERMISSION", "MISSING_DANGEROUS_PERMISSION"]
 
     def _get_all_components_by_permission(self, xml, permission):
         """
@@ -60,13 +60,11 @@ class Vector(VectorBase):
 
 
     def analyze(self) -> None:
-        all_permissions = self.apk.get_permissions()
-        all_permissions = list(set(all_permissions)) # get rid of duplicates
+        all_permissions = list(set(self.all_permissions)) # get rid of duplicates
 
         # Empty permissionGroup check
         # TODO test dit
-        xml = self.apk.get_android_manifest_xml()
-        permissions = utils.get_elements_by_tagname(xml, "permission")
+        permissions = utils.get_elements_by_tagname(self.xml, "permission")
 
         permissions_with_empty_permission_group = list()
         permissionGroupRe = re.compile(".*:permissionGroup=\"\".*")
@@ -183,7 +181,7 @@ class Vector(VectorBase):
 
             for class_name in dangerous_custom_permissions:
                 self.writer.write(class_name)
-                self._print_permission_usage(xml, class_name)
+                self._print_permission_usage(self.xml, class_name)
 
         else:
             self.writer.startWriter("PERMISSION_DANGEROUS", LEVEL_INFO,
@@ -203,7 +201,7 @@ class Vector(VectorBase):
                                     "or otherwise change to \"signature\" or \"signatureOrSystem\" protection level.")
             for class_name in normal_or_default_custom_permissions:
                 self.writer.write(class_name)
-                self._print_permission_usage(xml, class_name)
+                self._print_permission_usage(self.xml, class_name)
 
         else:
             self.writer.startWriter("PERMISSION_NORMAL", LEVEL_INFO,
@@ -228,8 +226,7 @@ class Vector(VectorBase):
             dangerous_permissions = list(set(dangerous_permissions))
 
             checked_permissions = []
-            all_strings = self.analysis.get_strings()
-            for string in all_strings:
+            for string in self.all_strings:
                 for permission in dangerous_permissions:
                     if permission in string.get_value():
                         calls = list(string.get_xref_from())
@@ -241,14 +238,11 @@ class Vector(VectorBase):
             num_perms = len(dangerous_permissions)
             num_checks = len(checked_permissions)
 
-            all_method_objects = self.analysis.get_methods()
-            all_methods = [object.name for object in all_method_objects]
-
             if self.int_min_sdk >= 21: map_xml = ET.parse("API21_permission_mappings.xml").getroot()
             else:                      map_xml = ET.parse("API18_permission_mappings.xml").getroot()
 
             mapped_methods = {}
-            used_dangerous_permissions = copy.deepcopy(checked_permissions)
+            used_dangerous_permissions = []
             for permission in dangerous_permissions:
                 permission_maps = utils.get_elements_by_tagname(map_xml, "permission")
                 for permission_map in permission_maps:  
@@ -258,7 +252,7 @@ class Vector(VectorBase):
                         for call in mapped_calls:
                             method_class = call.findall("class")[0].text
                             method = call.findall("method")[0].text
-                            if method in all_methods:
+                            if method in self.all_methods:
                                 if permission in mapped_methods: mapped_methods[permission].append((method, method_class))
                                 else:                            mapped_methods[permission] = [(method, method_class)]
             used_dangerous_permissions = list(set(used_dangerous_permissions))
@@ -269,45 +263,45 @@ class Vector(VectorBase):
                                     "Permission(s) Not Being Used",
                                     "This app might be vulnerable to attacks due to the unused dangerous permissions listed below. Caution is advised.")
                 for permission in unused_dangerous_permissions:
-                    if permission in mapped_methods: 
-                        self.writer.write(permission)
-                    else:
-                        self.writer.write(permission + " (this permission is not listed in permission to API method mappings, it might be being used)")
-                    self._print_permission_usage(xml, permission)
+                    if permission not in mapped_methods:
+                        if permission not in checked_permissions:
+                            self.writer.write(permission)
+                        else:
+                            self.writer.write(permission + " (this permission is not listed in permission to API method mappings, this might be inaccurate)")  
+                        self._print_permission_usage(self.xml, permission)
 
-            if num_checks == 0 and used_dangerous_permissions:
-                self.writer.startWriter("PERMISSION_HANDLING", LEVEL_WARNING, 
-                                        "Permission(s) Handling Not Implemented",
-                                        "This app does not check for any of the permissions below before making priviliged API calls. This app might not behave correctly.")
+            if num_checks < num_perms and used_dangerous_permissions:
+                self.writer.startWriter("UNCHECKED_DANGEROUS_PERMISSION", LEVEL_WARNING, 
+                                        "Permission(s) Not Being Checked",
+                                        "This app does not check for the permissions below before making the respective priviliged API calls. This app might not behave correctly.")
                 for permission in dangerous_permissions:
-                    self.writer.write(permission)
-                    self._print_permission_usage(xml, permission)
-
-            elif num_checks < num_perms:
-                self.writer.startWriter("PERMISSION_CHECKING", LEVEL_WARNING, 
-                                    "Permission(s) Not Being Checked",
-                                    "This app does not check for the permissions below before making the respective priviliged API calls. This app might not behave correctly.")
-                for permission in dangerous_permissions:
-                    if permission not in checked_permissions:
+                    if permission not in checked_permissions and permission in used_dangerous_permissions:
                         try:
                             for (method, method_class) in mapped_methods[permission]:
                                 self.writer.write("Uses " + method + " from class " + method_class + " without checking for " + permission)
                         except KeyError:
                             self.writer.write(permission + " (could not find which API call is mapped to the permission)")
-                        self._print_permission_usage(xml, permission)
+                        self._print_permission_usage(self.xml, permission)
+                    elif permission not in checked_permissions:
+                        self.writer.write(permission + " (could not find which API call is mapped to the permission)")
+                        self._print_permission_usage(self.xml, permission)
                 
-            elif num_checks > num_perms:
-                self.writer.startWriter("PERMISSION_MISSING", LEVEL_WARNING, 
+            if num_checks > num_perms:
+                self.writer.startWriter("MISSING_DANGEROUS_PERMISSION", LEVEL_WARNING, 
                                         "Permission(s) Missing",
                                         "This app needs the permissions below for making the respective priviliged API calls but they are missing from it's AndroidManifest. This app might not behave correctly.")
                 for permission in checked_permissions:
                     if permission not in dangerous_permissions:
-                        try:
-                            for (method, method_class) in mapped_methods[permission]:
-                                self.writer.write("Uses " + method + " from class " + method_class + " without having " + permission)
-                        except KeyError:
+                        if permission in used_dangerous_permissions:
+                            try:
+                                for (method, method_class) in mapped_methods[permission]:
+                                    self.writer.write("Uses " + method + " from class " + method_class + " without having " + permission)
+                            except KeyError:
+                                self.writer.write(permission + " (could not find which API call is mapped to the permission)")
+                            self._print_permission_usage(self.xml, permission)
+                        else:
                             self.writer.write(permission + " (could not find which API call is mapped to the permission)")
-                        self._print_permission_usage(xml, permission)
+                            self._print_permission_usage(self.xml, permission)
 
 
         # CHECK Lost "android:" prefix in exported components
@@ -315,7 +309,7 @@ class Vector(VectorBase):
         list_lost_exported_components = []
         find_tags = ["activity", "activity-alias", "service", "receiver", "provider"]
         for tag in find_tags:
-            for item in utils.get_elements_by_tagname(xml, tag):
+            for item in utils.get_elements_by_tagname(self.xml, tag):
                 name = item.attrib.get("{http://schemas.android.com/apk/res/android}name")
                 exported = item.attrib.get("exported")
                 if not utils.is_null_or_empty_string(name) and not utils.is_null_or_empty_string(exported):
@@ -440,7 +434,7 @@ class Vector(VectorBase):
         list_ready_to_check = []
         find_tags = ["activity", "activity-alias", "service", "receiver"]
         for tag in find_tags:
-            for item in utils.get_elements_by_tagname(xml, tag):
+            for item in utils.get_elements_by_tagname(self.xml, tag):
                 name = item.attrib.get("{http://schemas.android.com/apk/res/android}name")
                 exported = item.attrib.get("{http://schemas.android.com/apk/res/android}exported")
                 if not exported:
@@ -538,7 +532,7 @@ class Vector(VectorBase):
         # android:readPermission, android:writePermission, android:permission
         list_ready_to_check = []
 
-        for item in utils.get_elements_by_tagname(xml, "provider"):
+        for item in utils.get_elements_by_tagname(self.xml, "provider"):
             name = item.attrib.get("{http://schemas.android.com/apk/res/android}name")
             exported = item.attrib.get("{http://schemas.android.com/apk/res/android}exported")
             if not exported:
@@ -654,7 +648,7 @@ class Vector(VectorBase):
         list_wrong_intent_filter_settings = []
         list_no_actions_in_intent_filter = []
         for tag in find_tags:
-            for item in utils.get_elements_by_tagname(xml, tag):
+            for item in utils.get_elements_by_tagname(self.xml, tag):
                 isDetected1 = False
                 isDetected2 = False
                 for ssitem in utils.get_elements_by_tagname(item, "intent-filter"):

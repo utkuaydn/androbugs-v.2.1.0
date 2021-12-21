@@ -6,7 +6,7 @@ from androguard.core.analysis import analysis
 import collections  # for sorting key of dictionary
 from constants import *
 
-DIRECTORY_REPORT_OUTPUT = "Reports/"  # Only need to specify when (REPORT_OUTPUT = TYPE_REPORT_OUTPUT_ONLY_FILE) or (REPORT_OUTPUT = TYPE_REPORT_OUTPUT_PRINT_AND_FILE)
+DIRECTORY_REPORT_OUTPUT = "./Reports"  # Only need to specify when (REPORT_OUTPUT = TYPE_REPORT_OUTPUT_ONLY_FILE) or (REPORT_OUTPUT = TYPE_REPORT_OUTPUT_PRINT_AND_FILE)
 
 class Writer:
     def __init__(self):

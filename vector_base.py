@@ -32,6 +32,11 @@ class VectorBase(ABC):
         self.filtering_engine = FilteringEngine(ENABLE_EXCLUDE_CLASSES, STR_REGEXP_TYPE_EXCLUDE_CLASSES)
         self.int_target_sdk = int_target_sdk
         self.int_min_sdk = int_min_sdk
+        self.all_strings = analysis.get_strings()
+        self.all_method_objects = analysis.get_methods()
+        self.all_methods = [object.name for object in self.all_method_objects]
+        self.xml = apk.get_android_manifest_xml()
+        self.all_permissions = apk.get_permissions()
 
     def _print_xrefs(self, string_analysis) -> None:
         """

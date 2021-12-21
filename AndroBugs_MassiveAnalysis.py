@@ -7,14 +7,11 @@ import sys
 
 ANALYZE_ENGINE_BUILD_DEFAULT = 1  # Analyze Engine(use only number)
 
-def parseArgument():
-    parser = argparse.ArgumentParser(
-        description='AndroBugs Framework: Android APK Vulnerability Scanner - Massive Tool')
+def parseArgument(parser):
     parser.add_argument("-d", "--input_apk_dir", help="APK input directory to analyze", type=str, required=True)
     parser.add_argument("-b", "--analyze_engine_build", help="Analysis build number.", type=int, required=False, default=ANALYZE_ENGINE_BUILD_DEFAULT)
     parser.add_argument("-tag", "--analyze_tag", help="Analysis tag to uniquely distinguish this time of analysis.",
                         type=str, required=False, default=None)
-    parser.add_argument("-o", "--report_output_dir", help="Analysis Report Output Directory.", type=str, required=True)
     parser.add_argument("-e", "--extra",
                         help="1)Do not check(default)  2)Check  security class names, method names and native methods",
                         type=int, required=False, default=1)
@@ -27,17 +24,18 @@ def parseArgument():
     parser.add_argument("-j", "--json", action="store_true", required=False)
     parser.add_argument("-t", "--text", action="store_true", required=False)
     parser.add_argument("-p", "--print", action="store_true", required=False)
+    parser.add_argument("-o", "--report_output_dir", help="Analysis Report Output Directory.", type=str, required=False, default="./Reports")
     args = parser.parse_args()
     return args
 
 
 def main():
-    args = parseArgument()
+    parser = argparse.ArgumentParser(description="## AndroBugs Framework: Android APK Vulnerability Scanner - Massive Tool ##")
+    args = parseArgument(parser)
 
-    print()
-    print("## AndroBugs Framework: Android APK Vulnerability Scanner - Massive Tool ##")
-    print()
-
+    if args.json == False and args.text == False and args.print == False and args.store_analysis_result_in_db == False:
+        parser.error("Please provide at least one output format (--json, --text, --print, or --store_analysis_result_in_db)")
+        
     if args.store_analysis_result_in_db:
 
         from pymongo import MongoClient
@@ -154,13 +152,13 @@ class Analysis():
                 cmd = main_cmd + " -v -s -e " + str(self._args.extra) + " -f \"" + (os.path.join(self._input_dir,
                                                                                         filename)) + "\" -o \"" + (self._output_dir) + \
                 "\" -m massive -b " + str(self._args.analyze_engine_build) + " -tag " + str(self._args.analyze_tag) + " -t"
+            else:
+                cmd = main_cmd + " -v -s -e " + str(self._args.extra) + " -f \"" + (os.path.join(self._input_dir,
+                                                                                        filename)) + "\" -o \"" + (self._output_dir) + \
+                "\" -m massive -b " + str(self._args.analyze_engine_build) + " -tag " + str(self._args.analyze_tag)
         
         else:
-            if self._args.json is False and self._args.text is False:
-                cmd = main_cmd + " -v -e " + str(self._args.extra) + " -f \"" + (os.path.join(self._input_dir,
-                                                                                            filename)) + "\" -o \"" + (self._output_dir) + \
-                    "\" -m massive -b " + str(self._args.analyze_engine_build) + " -tag " + str(self._args.analyze_tag)
-            elif self._args.json and self._args.print and self._args.text:
+            if self._args.json and self._args.print and self._args.text:
                 cmd = main_cmd + " -v -e " + str(self._args.extra) + " -f \"" + (os.path.join(self._input_dir,
                                                                                         filename)) + "\" -o \"" + (self._output_dir) + \
                 "\" -m massive -b " + str(self._args.analyze_engine_build) + " -tag " + str(self._args.analyze_tag) + " -j -p -t"
