@@ -291,35 +291,35 @@ class Vector(VectorBase):
                         self.writer.write(permission + " (could not find which API call is mapped to the permission)")
                         self._print_permission_usage(xml, permission)
 
-            # if a method is in all_methods and in mapped_methods[permission] and permission is not in dangerous_permissions
-            flag = False
-            for call in all_method_objects:
-                for permission in mapped_methods:
-                    if permission not in dangerous_permissions:
-                        for (method, method_class) in mapped_methods[permission]:
-                            if call.get_name().lower() == method.lower() and method_class.lower() in call.get_class_name().lower():
-                                flag = True
-                                break
-                        else: continue
-                        break
-                else: continue
-                break
-
-
-            if flag:
-                self.writer.startWriter("MISSING_DANGEROUS_PERMISSION", LEVEL_WARNING, 
-                                        "Permission(s) Missing",
-                                        "This app needs the permissions below for making the respective priviliged API calls but they are missing from it's AndroidManifest. This app might not behave correctly.")
+            if self.int_target_sdk == 21 or self.int_target_sdk == 18:
+                # if a method is in all_methods and in mapped_methods[permission] and permission is not in dangerous_permissions
+                flag = False
                 for call in all_method_objects:
                     for permission in mapped_methods:
                         if permission not in dangerous_permissions:
-                            try:
-                                for (method, method_class) in mapped_methods[permission]:
-                                    if call.get_name().lower() == method.lower() and method_class.lower() in call.get_class_name().lower(): 
-                                        self.writer.write("Uses " + method + " from class " + method_class + " without having " + permission)
-                            except KeyError:
-                                self.writer.write(permission + " (could not find which API call is mapped to the permission)")
-                            self._print_permission_usage(xml, permission)
+                            for (method, method_class) in mapped_methods[permission]:
+                                if call.get_name().lower() == method.lower() and method_class.lower() in call.get_class_name().lower():
+                                    flag = True
+                                    break
+                            else: continue
+                            break
+                    else: continue
+                    break
+
+
+                if flag:
+                    self.writer.startWriter("MISSING_DANGEROUS_PERMISSION", LEVEL_WARNING, 
+                                            "Permission(s) Missing",
+                                            "This app needs the permissions below for making the respective priviliged API calls but they are missing from it's AndroidManifest. This app might not behave correctly.")
+                    for call in all_method_objects:
+                        for permission in mapped_methods:
+                            if permission not in dangerous_permissions:
+                                try:
+                                    for (method, method_class) in mapped_methods[permission]:
+                                        if call.get_name().lower() == method.lower() and method_class.lower() in call.get_class_name().lower(): 
+                                            self.writer.write("Uses " + method + " from class " + method_class + " without having " + permission)
+                                except KeyError:
+                                    self.writer.write(permission + " (could not find which API call is mapped to the permission)")
 
 
         # CHECK Lost "android:" prefix in exported components
