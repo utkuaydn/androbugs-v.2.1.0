@@ -358,9 +358,6 @@ def main():
     parser = argparse.ArgumentParser(description='AndroBugs Framework - Android App Security Vulnerability Scanner')
     args = parseArgument(parser)
 
-    if args.json == False and args.text == False and args.print == False and args.store_analysis_result_in_db == False:
-        parser.error("Please provide at least one output format (--json, --text, --print, or --store_analysis_result_in_db)")
-
     # list vectors
     if args.list_vectors:
         print("The following vector tags are defined")
@@ -377,6 +374,9 @@ def main():
         return
     elif args.apk_file is None:
         parser.error("APK name is required")
+
+    if args.json == False and args.text == False and args.print == False and args.store_analysis_result_in_db == False:
+        parser.error("Please provide at least one output format (--json, --text, --print, or --store_analysis_result_in_db)")
 
     writer = Writer()
 

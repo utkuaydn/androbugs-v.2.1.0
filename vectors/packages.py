@@ -11,15 +11,15 @@ class Vector(VectorBase):
             "LISTEN_PACKAGE_REPLACED_DYNAMIC", "LISTEN_PACKAGE_REMOVED_DYNAMIC", "QUERY_PERMISSION", "QUERY_OF_INTENT", "QUERY_OF_PACKAGE", "QUERY_WITHOUT_PERMISSION", "QUERY_OF_UNKNOWN_PACKAGES"] # list of tags that are checked within this class
 
     def analyze(self) -> None:
-
-        receiver_list = utils.get_elements_by_tagname(self.xml, "receiver")
+        xml = self.apk.get_android_manifest_xml()
+        receiver_list = utils.get_elements_by_tagname(xml, "receiver")
         for receiver in receiver_list:
             intent_filters = utils.get_elements_by_tagname(receiver, "intent-filter")
             for intent_filter in intent_filters:
                 actions = utils.get_elements_by_tagname(intent_filter, "action")
                 for action in actions:
                     action_name = action.attrib.get("{http://schemas.android.com/apk/res/android}name")
-                    if action_name == "android.intent.action.PACKAGE_ADDED":
+                    if action_name == "android.intent.action.PACKAGE_ADDED" or action_name == "android.intent.action.PACKAGE_INSTALL":
                         self.writer.startWriter("LISTEN_PACKAGE_ADDED_MANIFEST", LEVEL_WARNING, 
                                                 "App Listens for Added Applications",
                                                 "This app is notified when an application is installed on the device. This broadcast receiver is declared in the manifest file.")
@@ -36,8 +36,10 @@ class Vector(VectorBase):
                                                 "App Listens for Removed Applications",
                                                 "This app is notified when an application is removed on the device. This broadcast receiver is declared in the manifest file.")
 
-        for string in self.all_strings:
-            if "PACKAGE_ADDED" in string.get_value():
+        all_strings = self.analysis.get_strings()
+        for string in all_strings:
+            string_value = string.get_value()
+            if string_value == "android.intent.action.PACKAGE_ADDED" or string_value == "android.intent.action.PACKAGE_INSTALL":
                 calls = list(string.get_xref_from())
                 for i in range(len(calls)):
                     call = calls[i][1].get_name()
@@ -46,36 +48,39 @@ class Vector(VectorBase):
                                                 "App Listens for Added Applications",
                                                 "This app is notified when an application is installed on the device. This broadcast receiver is declared dynamically in the source code.")
 
-            if "PACKAGE_CHANGED" in string.get_value():
+            if string_value == "android.intent.action.PACKAGE_CHANGED":
                 calls = list(string.get_xref_from())
                 for i in range(len(calls)):
                     call = calls[i][1].get_name()
                     if call == "IntentFilter" or call == "getIntExtra" or call == "addAction" or call == "onReceive":
                         self.writer.startWriter("LISTEN_PACKAGE_CHANGED_DYNAMIC", LEVEL_WARNING, 
-                                                "App Listens for Added Applications",
+                                                "App Listens for Changed Applications",
                                                 "This app is notified when an application is changed on the device. This broadcast receiver is declared dynamically in the source code.")
 
-            if "PACKAGE_REPLACED" in string.get_value():
+            if string_value == "android.intent.action.PACKAGE_REPLACED":
                 calls = list(string.get_xref_from())
                 for i in range(len(calls)):
                     call = calls[i][1].get_name()
                     if call == "IntentFilter" or call == "getIntExtra" or call == "addAction" or call == "onReceive":
                         self.writer.startWriter("LISTEN_PACKAGE_REPLACED_DYNAMIC", LEVEL_WARNING, 
-                                                "App Listens for Added Applications",
+                                                "App Listens for Replaced Applications",
                                                 "This app is notified when an application is replaced on the device. This broadcast receiver is declared dynamically in the source code.")
 
-            if "PACKAGE_FULLY_REMOVED" in string.get_value() or "PACKAGE_REMOVED" in string.get_value():
+            if string_value == "android.intent.action.PACKAGE_FULLY_REMOVED" or string_value == "android.intent.action.PACKAGE_REMOVED":
                 calls = list(string.get_xref_from())
                 for i in range(len(calls)):
                     call = calls[i][1].get_name()
                     if call == "IntentFilter" or call == "getIntExtra" or call == "addAction" or call == "onReceive":
                         self.writer.startWriter("LISTEN_PACKAGE_REMOVED_DYNAMIC", LEVEL_WARNING, 
-                                                "App Listens for Added Applications",
+                                                "App Listens for Removed Applications",
                                                 "This app is notified when an application is removed on the device. This broadcast receiver is declared dynamically in the source code.")
 
-        if "queryIntentActivities" in self.all_methods or "getInstalledApplications" in self.all_methods or "getPackageInfo" in self.all_methods:
+        all_method_class_objects = self.analysis.get_methods()
+        all_methods = [object.name for object in all_method_class_objects]
+        all_permissions = self.apk.get_permissions()
+        if "queryIntentActivities" in all_methods or "getInstalledApplications" in all_methods or "getPackageInfo" in all_methods:
             if self.int_target_sdk >= 30 or self.int_min_sdk >= 30:
-                query_list = utils.get_elements_by_tagname(self.xml, "queries")
+                query_list = utils.get_elements_by_tagname(xml, "queries")
                 queried_packages = []
                 queried_intents = []
                 for query in query_list:
@@ -96,7 +101,7 @@ class Vector(VectorBase):
                         else:                data_name = None
                         queried_intents.append((action_name, data_name))
 
-                if "android.permission.QUERY_ALL_PACKAGES" in self.all_permissions:
+                if "android.permission.QUERY_ALL_PACKAGES" in all_permissions:
                     self.writer.startWriter("QUERY_PERMISSION", LEVEL_CRITICAL, 
                                                     "App Has Permission to Query All Packages",
                                                     "This app has the permission QUERY_ALL_PACKAGES declared in it's AndroidManifest. Caution is advised.")
