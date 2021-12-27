@@ -241,8 +241,8 @@ class Vector(VectorBase):
             num_perms = len(dangerous_permissions)
             num_checks = len(checked_permissions)
 
-            if self.int_min_sdk >= 21: map_xml = ET.parse("API21_permission_mappings.xml").getroot()
-            else:                      map_xml = ET.parse("API18_permission_mappings.xml").getroot()
+            if self.int_target_sdk >= 21: map_xml = ET.parse("API21_permission_mappings.xml").getroot()
+            else:                         map_xml = ET.parse("API18_permission_mappings.xml").getroot()
 
             all_method_class_objects = self.analysis.get_methods()
             all_method_objects = [object.get_method() for object in all_method_class_objects]
