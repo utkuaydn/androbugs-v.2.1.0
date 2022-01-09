@@ -78,7 +78,7 @@ class Vector(VectorBase):
         all_method_class_objects = self.analysis.get_methods()
         all_methods = [object.name for object in all_method_class_objects]
         all_permissions = self.apk.get_permissions()
-        if "queryIntentActivities" in all_methods or "getInstalledApplications" in all_methods or "getPackageInfo" in all_methods:
+        if "queryIntentActivities" in all_methods or "getInstalledApplications" in all_methods or "getPackageInfo" in all_methods or "getInstalledPackages" in all_methods:
             if self.int_target_sdk >= 30 or self.int_min_sdk >= 30:
                 query_list = utils.get_elements_by_tagname(xml, "queries")
                 queried_packages = []

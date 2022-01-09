@@ -23,7 +23,7 @@ class Vector(VectorBase):
             "USE_PERMISSION_SYSTEM_APP", "PERMISSION_NORMAL", "PERMISSION_DANGEROUS",
             "PERMISSION_NO_PREFIX_EXPORTED", "PERMISSION_EXPORTED",
             "PERMISSION_PROVIDER_IMPLICIT_EXPORTED", "PERMISSION_INTENT_FILTER_MISCONFIG",
-            "PERMISSION_IMPLICIT_SERVICE", "MISSING_DANGEROUS_PERMISSION", "UNUSED_DANGEROUS_PERMISSION", "UNCHECKED_DANGEROUS_PERMISSION"]
+            "PERMISSION_IMPLICIT_SERVICE", "DECLARED_DANGEROUS_PERMISSIONS", "UNUSED_DANGEROUS_PERMISSION", "UNCHECKED_DANGEROUS_PERMISSION", "MISSING_DANGEROUS_PERMISSION"]
 
     def _get_all_components_by_permission(self, xml, permission):
         """
@@ -227,6 +227,13 @@ class Vector(VectorBase):
                     dangerous_permissions.append(name)
             dangerous_permissions = list(set(dangerous_permissions))
 
+            if dangerous_permissions:
+                self.writer.startWriter("DECLARED_DANGEROUS_PERMISSIONS", LEVEL_INFO, 
+                                    "List of Declared Dangerous Permission(s)",
+                                    "Below is the list of declared dangerous permissions.")
+                for permission in dangerous_permissions:
+                    self.writer.write(permission)
+            
             checked_permissions = []
             all_strings = self.analysis.get_strings()
             for string in all_strings:
@@ -237,6 +244,13 @@ class Vector(VectorBase):
                             call = calls[i][1].get_name()
                             if call == "checkSelfPermission" or call == "onRequestPermissionsResult" or call == "registerForActivityResult": checked_permissions.append(permission)
             checked_permissions = list(set(checked_permissions))
+
+            if checked_permissions:
+                self.writer.startWriter("CHECKED_DANGEROUS_PERMISSIONS", LEVEL_INFO, 
+                                    "List of Checked Dangerous Permission(s)",
+                                    "Below is the list of checked dangerous permissions.")
+                for permission in checked_permissions:
+                    self.writer.write(permission)
 
             num_perms = len(dangerous_permissions)
             num_checks = len(checked_permissions)
@@ -264,6 +278,13 @@ class Vector(VectorBase):
             used_dangerous_permissions = list(set(used_dangerous_permissions))
             unused_dangerous_permissions = [p for p in dangerous_permissions if p not in used_dangerous_permissions]
 
+            if used_dangerous_permissions:
+                self.writer.startWriter("USED_DANGEROUS_PERMISSIONS", LEVEL_INFO, 
+                                    "List of Used Dangerous Permission(s)",
+                                    "Below is the list of used dangerous permissions according to our API permission mappings.")
+                for permission in used_dangerous_permissions:
+                    self.writer.write(permission)
+
             if unused_dangerous_permissions:
                 self.writer.startWriter("UNUSED_DANGEROUS_PERMISSION", LEVEL_CRITICAL, 
                                     "Permission(s) Not Being Used",
@@ -272,8 +293,9 @@ class Vector(VectorBase):
                     if permission not in checked_permissions:
                         self.writer.write(permission)
                     else:
-                        self.writer.write(permission + " (this permission is not listed in permission to API method mappings, this might be inaccurate)")  
+                        self.writer.write(permission + " (this inference might be inaccurate due to our API method mappings)")  
                     self._print_permission_usage(xml, permission)
+
 
             if num_checks < num_perms and used_dangerous_permissions:
                 self.writer.startWriter("UNCHECKED_DANGEROUS_PERMISSION", LEVEL_WARNING, 
@@ -285,14 +307,14 @@ class Vector(VectorBase):
                             for (method, method_class) in mapped_methods[permission]:
                                 self.writer.write("Uses " + method + " from class " + method_class + " without checking for " + permission)
                         except KeyError:
-                            self.writer.write(permission + " (could not find which API call is mapped to the permission)")
+                            self.writer.write(permission + " (this permission is not listed in permission to API method mappings, this might be inaccurate)")
                         self._print_permission_usage(xml, permission)
                     elif permission not in checked_permissions:
-                        self.writer.write(permission + " (could not find which API call is mapped to the permission)")
+                        self.writer.write(permission + " (this permission is not listed in permission to API method mappings, this might be inaccurate)")
                         self._print_permission_usage(xml, permission)
 
+
             if self.int_target_sdk == 21 or self.int_target_sdk == 18:
-                # if a method is in all_methods and in mapped_methods[permission] and permission is not in dangerous_permissions
                 flag = False
                 for call in all_method_objects:
                     for permission in mapped_methods:
@@ -306,7 +328,6 @@ class Vector(VectorBase):
                     else: continue
                     break
 
-
                 if flag:
                     self.writer.startWriter("MISSING_DANGEROUS_PERMISSION", LEVEL_WARNING, 
                                             "Permission(s) Missing",
@@ -314,12 +335,9 @@ class Vector(VectorBase):
                     for call in all_method_objects:
                         for permission in mapped_methods:
                             if permission not in dangerous_permissions:
-                                try:
-                                    for (method, method_class) in mapped_methods[permission]:
-                                        if call.get_name().lower() == method.lower() and method_class.lower() in call.get_class_name().lower(): 
-                                            self.writer.write("Uses " + method + " from class " + method_class + " without having " + permission)
-                                except KeyError:
-                                    self.writer.write(permission + " (could not find which API call is mapped to the permission)")
+                                for (method, method_class) in mapped_methods[permission]:
+                                    if call.get_name().lower() == method.lower() and method_class.lower() in call.get_class_name().lower(): 
+                                        self.writer.write("Uses " + method + " from class " + method_class + " without having " + permission)
 
 
         # CHECK Lost "android:" prefix in exported components
