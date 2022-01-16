@@ -14,6 +14,8 @@ Version: 2.1.0
 - Check an app’s security protections (marked as ```<Hacker>```, designed for app repackaging hacking)
 - Find and decode base64 encoded strings
 - Easy development and integration of new vulnerability vectors (see [EXTENDING.md](EXTENDING.md))
+- Check for any possibilites of permission abuse
+- Check for package listeners and if an app is obtaining list of installed applications
 
 
 ## Setup
