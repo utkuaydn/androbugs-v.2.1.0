@@ -2,7 +2,7 @@ uuid==1.30
 datetime==5.1
 argparse==1.4.0
 ConfigParser==7.0.0
-pymongo==4.6.3
+pymongo==4.7.3
 androguard==3.3.5
 dnspython==2.6.1
 python-magic==0.4.27
